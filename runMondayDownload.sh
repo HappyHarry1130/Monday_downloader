@@ -17,7 +17,7 @@ LOG_FILE_NAME=$(echo $DL_DIR_NAME | sed 's/-/_/g')-$DATETIME.log
 
 node $DL_MAIN_FILE 1> ./reports/Majestic-downloader-$DATETIME.log 2>&1
 
-find ./reports -type f -exec gsutil cp "$DL_CSV_DIR_NAME"/*.csv "$DL_GS_BUCKET_NAME"/ \; >> ./reports/$LOG_FILE_NAME 2>&1
+find ./reports -type f -exec gsutil cp "$DL_CSV_DIR_NAME"/*.csv "$DL_GS_BUCKET_NAME"/"$DATETIME"/ \; >> ./reports/$LOG_FILE_NAME 2>&1
 #find ./reports -type f -exec gsutil cp {} gs://statbid/$DL_DIR_NAME/{}-$DATETIME \; >> ./reports/$LOG_FILE_NAME 2>&1
 
 ERROR_COUNT=$(cat ./reports/$LOG_FILE_NAME | grep -ic error)
