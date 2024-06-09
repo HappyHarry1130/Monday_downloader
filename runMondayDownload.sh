@@ -3,8 +3,8 @@
 
 DL_MAIN_FILE=./dist/main.js
 DL_DIR_NAME=monday_downloader
-DL_BQ_DATASET_NAME=Monday
-DL_BQ_TABLE_NAME=Monday
+DL_BQ_DATASET_NAME=123inkjets
+DL_BQ_TABLE_NAME=monday
 DL_CSV_DIR_NAME=output
 DL_GS_BUCKET_NAME=gs://statbid-argos-datacollection-prod1/123inkjets/monday
 
