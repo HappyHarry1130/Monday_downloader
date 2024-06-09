@@ -16,17 +16,17 @@ export class MondayDownloader {
     private static SERVICE_NAME = 'awr-downloader';
     private logger = new StatbidMessageLogger();
     private config = new DownloaderConfig();
+    private csvFilePath ="output/monday.csv"
 
     async execute(config: DownloaderConfig) {
         try {
             this.config = config;
-            //process.env.GOOGLE_APPLICATION_CREDENTIALS = config.credentialsPath;
+            process.env.GOOGLE_APPLICATION_CREDENTIALS = config.credentialsPath;
             let dateTime = new Date();
             let filename = `${dateTime}.csv`;
             console.log("start")
             const datas = await this.fetchData();
             this.convertToCsv(datas, "convert");
-            console.log(datas);
         } catch (error: any) {
             this.logger.logFatal(
                 MondayDownloader.SERVICE_NAME,
@@ -216,7 +216,7 @@ export class MondayDownloader {
     }
 
 
-    private async convertToCsv(jsonData: JsonData[], project: string): Promise<void> {
+    private async convertToCsv(jsonData: JsonData[], cs: string): Promise<void> {
         if (!Array.isArray(jsonData)) {
             console.error('Invalid JSON data');
             return;
@@ -231,7 +231,10 @@ export class MondayDownloader {
         const dataWithProjectID: JsonData[] = jsonData.map((obj: JsonData) => {
             return { ...obj };
         });
-
+        const directoryPath = 'output';
+        if (!fs.existsSync(directoryPath)) {
+            fs.mkdirSync(directoryPath);
+        }
         try {
             const csv = await new Promise<string>((resolve, reject) => {
                 stringify(dataWithProjectID, { header: true }, (err, output) => {
@@ -243,7 +246,7 @@ export class MondayDownloader {
                 });
             });
 
-            fs.writeFile("monday.csv", csv, function (err) {
+            fs.writeFile(`${directoryPath}/monday.csv`, csv, function (err) {
                 if (err) {
                     console.error('Error writing CSV file:', err);
                 } else {
