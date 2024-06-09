@@ -5,28 +5,29 @@
 import fs from 'fs';
 import axios from 'axios';
 import { stringify } from 'csv-stringify';
+const csv = require('csv-parser');
 
 import { DownloaderConfig } from "./dto/DownloaderConfig";
 import { StatbidMessageLogger } from "./helpers/StatbidMessageLogger";
 import { JsonData, ColumnValue, Item } from './interfaces/MondayInterface';
+import { createObjectCsvWriter } from 'csv-writer';
 
+const moment = require('moment');
 
 export class MondayDownloader {
     
     private static SERVICE_NAME = 'awr-downloader';
     private logger = new StatbidMessageLogger();
     private config = new DownloaderConfig();
-    private csvFilePath ="output/monday.csv"
 
     async execute(config: DownloaderConfig) {
         try {
             this.config = config;
             //process.env.GOOGLE_APPLICATION_CREDENTIALS = config.credentialsPath;
-            let dateTime = new Date();
-            let filename = `${dateTime}.csv`;
             console.log("start")
             const datas = await this.fetchData();
-            this.convertToCsv(datas, "convert");
+            await this.convertToCsv(datas, "convert");
+            await this.addDatefield();
         } catch (error: any) {
             this.logger.logFatal(
                 MondayDownloader.SERVICE_NAME,
@@ -258,4 +259,43 @@ export class MondayDownloader {
         }
     }
 
+    private async addDatefield() {
+        
+        const inputFile = './output/monday.csv';
+        const outputFile = './output/monday.csv';
+        const rows: any[] = [];
+    
+        fs.createReadStream(inputFile)
+            .pipe(csv())
+            .on('data', (row: any) => {
+                const currentDate = new Date().toISOString().slice(0, 10);
+                row = { Date: currentDate, ...row };
+                rows.push(row);
+            })
+            .on('end', () => {
+                if (rows.length > 0) {
+                    const csvWriter = createObjectCsvWriter({
+                        path: outputFile,
+                        header: Object.keys(rows[0]).map((key) => ({ id: key, title: key })),
+                    });
+    
+                    csvWriter
+                        .writeRecords(rows)
+                        .then(() => {
+                            console.log('CSV file successfully written');
+                        })
+                        .catch((error) => {
+                            console.error('Error writing CSV file:', error);
+                        });
+                } else {
+                    console.error('No data to write to CSV');
+                }
+            });
+    }
+    
 }
+
+
+
+// Process
+
