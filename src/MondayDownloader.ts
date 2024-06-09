@@ -20,7 +20,7 @@ export class MondayDownloader {
     async execute(config: DownloaderConfig) {
         try {
             this.config = config;
-            process.env.GOOGLE_APPLICATION_CREDENTIALS = config.credentialsPath;
+            //process.env.GOOGLE_APPLICATION_CREDENTIALS = config.credentialsPath;
             let dateTime = new Date();
             let filename = `${dateTime}.csv`;
             console.log("start")
