@@ -6,7 +6,7 @@ DL_DIR_NAME=monday_downloader
 DL_BQ_DATASET_NAME=Monday
 DL_BQ_TABLE_NAME=Monday
 DL_CSV_DIR_NAME=output
-DL_GS_BUCKET_NAME=gs://statbid1/statbid-argos-datacollection-prod/knifecenter/majestic
+DL_GS_BUCKET_NAME=gs://statbid1/statbid-argos-datacollection-prod/knifecenter/monday
 
 gcloud auth activate-service-account --key-file=../feed-storage-94d94e70e271.json
 
