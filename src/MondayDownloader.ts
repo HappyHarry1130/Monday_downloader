@@ -304,7 +304,7 @@ export class MondayDownloader {
     }
     
     private formatDate(date: Date): string {
-        return moment(date).format('DD-MM-YYYY');
+        return moment(date).format('YYYY-MM-DD');
     }
     
     private deleteFileAsync(filePath: string): void {
