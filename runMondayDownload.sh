@@ -35,7 +35,7 @@ if [ $ERROR_COUNT -eq 0 ]; then
 
     bq load --source_format=CSV --autodetect \
         "$DL_BQ_DATASET_NAME"."$DL_BQ_TABLE_NAME" \
-        "$DL_GS_BUCKET_NAME"/"$DATETIME"/*.csv >> ./reports/$LOG_FILE_NAME 2>&1
+        "$DL_GS_BUCKET_NAME"/*.csv >> ./reports/$LOG_FILE_NAME 2>&1
 fi
 
 ERROR_COUNT=$(grep -ic error ./reports/$LOG_FILE_NAME)
