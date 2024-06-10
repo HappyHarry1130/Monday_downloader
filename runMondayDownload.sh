@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 DL_MAIN_FILE=./dist/main.js
@@ -15,12 +14,17 @@ mkdir -p ./reports
 DATETIME=$(date -Iseconds)
 LOG_FILE_NAME=$(echo $DL_DIR_NAME | sed 's/-/_/g')-$DATETIME.log
 
-node $DL_MAIN_FILE 1> ./reports/Majestic-downloader-$DATETIME.log 2>&1
+# Run the main script and log output
+node $DL_MAIN_FILE > ./reports/Majestic-downloader-$DATETIME.log 2>&1
 
-find ./reports -type f -exec gsutil cp "$DL_CSV_DIR_NAME"/*.csv "$DL_GS_BUCKET_NAME"/"$DATETIME"/ \; >> ./reports/$LOG_FILE_NAME 2>&1
-#find ./reports -type f -exec gsutil cp {} gs://statbid/$DL_DIR_NAME/{}-$DATETIME \; >> ./reports/$LOG_FILE_NAME 2>&1
+# Check if there are CSV files to upload
+if ls $DL_CSV_DIR_NAME/*.csv 1> /dev/null 2>&1; then
+    gsutil cp "$DL_CSV_DIR_NAME"/*.csv "$DL_GS_BUCKET_NAME"/"$DATETIME"/ >> ./reports/$LOG_FILE_NAME 2>&1
+else
+    echo "No CSV files found in $DL_CSV_DIR_NAME" >> ./reports/$LOG_FILE_NAME
+fi
 
-ERROR_COUNT=$(cat ./reports/$LOG_FILE_NAME | grep -ic error)
+ERROR_COUNT=$(grep -ic error ./reports/$LOG_FILE_NAME)
 
 if [ $ERROR_COUNT -eq 0 ]; then
     if ! bq show --dataset $DL_BQ_DATASET_NAME &>/dev/null; then
@@ -31,7 +35,7 @@ if [ $ERROR_COUNT -eq 0 ]; then
 
     bq load --source_format=CSV --autodetect \
         "$DL_BQ_DATASET_NAME"."$DL_BQ_TABLE_NAME" \
-        "$DL_GS_BUCKET_NAME"/*.csv >> ./reports/$LOG_FILE_NAME 2>&1
+        "$DL_GS_BUCKET_NAME"/"$DATETIME"/*.csv >> ./reports/$LOG_FILE_NAME 2>&1
 fi
 
 ERROR_COUNT=$(grep -ic error ./reports/$LOG_FILE_NAME)
@@ -41,5 +45,5 @@ fi
 
 gsutil cp ./reports/$LOG_FILE_NAME "$DL_GS_BUCKET_NAME"/reports/$LOG_FILE_NAME
 
-rm -r "$DL_CSV_DIR_NAME"
-rm -r ./reports/
+rm -rf "$DL_CSV_DIR_NAME"
+rm -rf ./reports/
