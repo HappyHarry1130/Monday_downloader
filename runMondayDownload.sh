@@ -19,7 +19,7 @@ node $DL_MAIN_FILE > ./reports/Majestic-downloader-$DATETIME.log 2>&1
 
 # Check if there are CSV files to upload
 if ls $DL_CSV_DIR_NAME/*.csv 1> /dev/null 2>&1; then
-    gsutil cp "$DL_CSV_DIR_NAME"/*.csv "$DL_GS_BUCKET_NAME"/"$DATETIME"/ >> ./reports/$LOG_FILE_NAME 2>&1
+    gsutil cp "$DL_CSV_DIR_NAME"/*.csv "$DL_GS_BUCKET_NAME"/ >> ./reports/$LOG_FILE_NAME 2>&1
 else
     echo "No CSV files found in $DL_CSV_DIR_NAME" >> ./reports/$LOG_FILE_NAME
 fi
