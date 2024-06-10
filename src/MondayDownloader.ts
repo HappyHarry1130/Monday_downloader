@@ -260,37 +260,61 @@ export class MondayDownloader {
     }
 
     private async addDatefield() {
-        
         const inputFile = './output/monday.csv';
-        const outputFile = './output/monday.csv';
+        const date: Date = new Date();
+        const formattedDate = this.formatDate(date);
+        const outputFile = `./output/monday${formattedDate}.csv`;
         const rows: any[] = [];
     
-        fs.createReadStream(inputFile)
-            .pipe(csv())
-            .on('data', (row: any) => {
-                const currentDate = new Date().toISOString().slice(0, 10);
-                row = { Date: currentDate, ...row };
-                rows.push(row);
-            })
-            .on('end', () => {
-                if (rows.length > 0) {
-                    const csvWriter = createObjectCsvWriter({
-                        path: outputFile,
-                        header: Object.keys(rows[0]).map((key) => ({ id: key, title: key })),
-                    });
+        try {
+            await new Promise<void>((resolve, reject) => {
+                fs.createReadStream(inputFile)
+                    .pipe(csv())
+                    .on('data', (row: any) => {
+                        const currentDate = new Date().toISOString().slice(0, 10);
+                        row = { Date: currentDate, ...row };
+                        rows.push(row);
+                    })
+                    .on('end', async () => {
+                        if (rows.length > 0) {
+                            const csvWriter = createObjectCsvWriter({
+                                path: outputFile,
+                                header: Object.keys(rows[0]).map((key) => ({ id: key, title: key })),
+                            });
     
-                    csvWriter
-                        .writeRecords(rows)
-                        .then(() => {
-                            console.log('CSV file successfully written');
-                        })
-                        .catch((error) => {
-                            console.error('Error writing CSV file:', error);
-                        });
-                } else {
-                    console.error('No data to write to CSV');
-                }
+                            try {
+                                await csvWriter.writeRecords(rows);
+                                console.log('CSV file successfully written');
+                                this.deleteFileAsync(inputFile);
+                            } catch (error) {
+                                console.error('Error writing CSV file:', error);
+                            }
+                        } else {
+                            console.error('No data to write to CSV');
+                        }
+                        resolve();
+                    })
+                    .on('error', (err:any) => {
+                        reject(err);
+                    });
             });
+        } catch (err) {
+            console.error('Error reading CSV file:', err);
+        }
+    }
+    
+    private formatDate(date: Date): string {
+        return moment(date).format('DD-MM-YYYY');
+    }
+    
+    private deleteFileAsync(filePath: string): void {
+        fs.unlink(filePath, (err) => {
+            if (err) {
+                console.error(`Error deleting file: ${err.message}`);
+            } else {
+                console.log(`File deleted: ${filePath}`);
+            }
+        });
     }
     
 }
