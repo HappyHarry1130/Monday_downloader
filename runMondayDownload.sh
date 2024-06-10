@@ -27,11 +27,6 @@ fi
 ERROR_COUNT=$(grep -ic error ./reports/$LOG_FILE_NAME)
 
 if [ $ERROR_COUNT -eq 0 ]; then
-    if ! bq show --dataset $DL_BQ_DATASET_NAME &>/dev/null; then
-        bq mk --dataset $DL_BQ_DATASET_NAME >> ./reports/$LOG_FILE_NAME 2>&1
-    else
-        echo "Dataset $DL_BQ_DATASET_NAME already exists." >> ./reports/$LOG_FILE_NAME
-    fi
 
     bq load --source_format=CSV --autodetect \
         "$DL_BQ_DATASET_NAME"."$DL_BQ_TABLE_NAME" \
